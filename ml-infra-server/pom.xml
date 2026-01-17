@@ -37,7 +37,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.example.ml.infra.server.MlApplication</mainClass>
+                                    <mainClass>com.example.ml.infra.server.MLApplication</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
