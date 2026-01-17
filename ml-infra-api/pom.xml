@@ -1,0 +1,9 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.example.ml</groupId>
+        <artifactId>ml-infra-lite</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>ml-infra-api</artifactId>
+</project>
