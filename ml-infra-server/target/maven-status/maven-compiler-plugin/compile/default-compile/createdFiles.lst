@@ -1,0 +1,5 @@
+com/example/ml/infra/server/resources/ModelResource.class
+com/example/ml/infra/server/MLApplication.class
+com/example/ml/infra/server/MLApplication$1.class
+com/example/ml/infra/server/MLConfiguration$S3Config.class
+com/example/ml/infra/server/MLConfiguration.class
