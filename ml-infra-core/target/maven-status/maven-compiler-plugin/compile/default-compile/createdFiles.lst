@@ -1,3 +1,0 @@
-com/example/ml/infra/core/ModelManager.class
-com/example/ml/infra/core/engine/DummyInferenceEngine.class
-com/example/ml/infra/core/storage/S3ModelDownloader.class
