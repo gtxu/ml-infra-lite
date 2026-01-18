@@ -14,6 +14,7 @@ The project follows a clean architecture pattern:
 2. **ml-infra-core**: The business logic layer containing the `ModelManager` and storage abstractions.
 3. **ml-infra-server**: The hosting layer powered by Dropwizard, providing RESTful endpoints and Swagger documentation.
 
+
 ## Getting Started
 
 ### Prerequisites
@@ -36,3 +37,8 @@ java -jar target/ml-infra-server-1.0-SNAPSHOT.jar server ../config.yml
 ```bash
 # Build and start both the ML Server and MinIO
 docker-compose up --build
+```
+
+### Commit Standards
+This project uses **Husky** and **Commitlint** to enforce **Conventional Commits**. 
+Please ensure your commit messages follow the format: `type(scope): description`.
