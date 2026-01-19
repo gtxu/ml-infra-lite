@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-infra-service
+spec:
+  selector:
+    app: ml-infra
+  ports:
+    - name: http-app
+      protocol: TCP
+      port: 80         # Port exposed by the service
+      targetPort: 8080 # Port on the container
+    - name: http-admin
+      protocol: TCP
+      port: 8081       # Admin/Metrics port
+      targetPort: 8081
+  type: ClusterIP # Use LoadBalancer if deploying to AWS/GCP
