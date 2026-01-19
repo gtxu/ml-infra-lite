@@ -3,6 +3,7 @@ package com.example.ml.infra.server;
 import com.example.ml.infra.core.ModelCoordinator;
 import com.example.ml.infra.core.ModelManager;
 import com.example.ml.infra.core.storage.S3ModelDownloader;
+import com.example.ml.infra.server.health.ModelHealthCheck;
 import com.example.ml.infra.server.resources.ModelResource;
 
 import io.dropwizard.core.Application;
@@ -39,5 +40,7 @@ public class MLApplication extends Application<MLConfiguration> {
         final ModelCoordinator coordinator = new ModelCoordinator(modelManager, downloader);
 
         environment.jersey().register(new ModelResource(modelManager, coordinator));
+
+        environment.healthChecks().register("model-status", new ModelHealthCheck(modelManager, coordinator));
     }
 }
