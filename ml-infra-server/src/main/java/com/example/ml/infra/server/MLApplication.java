@@ -1,7 +1,10 @@
 package com.example.ml.infra.server;
 
+import com.example.ml.infra.core.ModelCoordinator;
 import com.example.ml.infra.core.ModelManager;
+import com.example.ml.infra.core.storage.S3ModelDownloader;
 import com.example.ml.infra.server.resources.ModelResource;
+
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
@@ -26,7 +29,15 @@ public class MLApplication extends Application<MLConfiguration> {
 
     @Override
     public void run(MLConfiguration configuration, Environment environment) {
+
+        var s3 = configuration.s3Config;
+        final S3ModelDownloader downloader = new S3ModelDownloader(
+            s3.endpoint, s3.region, s3.accessKey, s3.secretKey, s3.bucketName
+        );
+
         final ModelManager modelManager = new ModelManager();
-        environment.jersey().register(new ModelResource(modelManager));
+        final ModelCoordinator coordinator = new ModelCoordinator(modelManager, downloader);
+
+        environment.jersey().register(new ModelResource(modelManager, coordinator));
     }
 }

@@ -1,7 +1,9 @@
 package com.example.ml.infra.server.resources;
 
+import java.util.Map;
+
+import com.example.ml.infra.core.ModelCoordinator;
 import com.example.ml.infra.core.ModelManager;
-import com.example.ml.infra.core.engine.DummyInferenceEngine;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -15,25 +17,52 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class ModelResource {
     private final ModelManager manager;
+    private final ModelCoordinator coordinator;
 
-    public ModelResource(ModelManager manager) {
+    public ModelResource(ModelManager manager, ModelCoordinator coordinator) {
         this.manager = manager;
+        this.coordinator = coordinator;
     }
 
+    /**
+     * Data Plane: High-concurrency inference endpoint.
+     */
     @GET
     @Path("/predict")
     public String predict(@QueryParam("input") String input) {
         return manager.predict(input);
     }
 
+    /**
+     * Control Plane: Triggers an asynchronous model update.
+     */
     @POST
     @Path("/update")
     public Response update(@QueryParam("version") String version) {
         if (version == null || version.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Version is required").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity(Map.of("error", "Version is required"))
+                           .build();
         }
-        // Synchronous swap for initial validation
-        manager.applyNewEngine(new DummyInferenceEngine(version));
-        return Response.ok("Successfully swapped to version: " + version).build();
+
+        // Trigger the async update pipeline
+        coordinator.onModelUpdate(version);
+
+        return Response.accepted()
+                       .entity(Map.of(
+                           "message", "Update triggered successfully",
+                           "target_version", version,
+                           "status_url", "/v1/models/status"
+                       ))
+                       .build();
+    }
+
+    /**
+     * Observability: Check the current status of the update pipeline.
+     */
+    @GET
+    @Path("/status")
+    public Response getStatus() {
+        return Response.ok(Map.of("status", coordinator.getStatus())).build();
     }
 }
