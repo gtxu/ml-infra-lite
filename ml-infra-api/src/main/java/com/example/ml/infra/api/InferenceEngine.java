@@ -5,8 +5,12 @@ package com.example.ml.infra.api;
  * Decouples the HTTP layer from specific ML frameworks.
  * Using an interface allows us to swap DummyEngine with real ONNX/DL4J engines.
  */
-public interface InferenceEngine {
+public interface InferenceEngine extends AutoCloseable{
     String predict(String input);
     String getVersion();
-    // TODO: Add a close() method for native memory cleanup
+    
+    @Override
+    default void close() throws Exception {
+        // No-op by default
+    }
 }

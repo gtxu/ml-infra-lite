@@ -11,7 +11,7 @@ public class DummyInferenceEngine implements InferenceEngine {
 
     @Override
     public String predict(String input) {
-        return "Prediction result [Model v" + version + "]: " + input.toUpperCase();
+        return String.format("[Infra-ID:%d] [Model v%s] Result: %s", Thread.currentThread().getId(), version, input.toUpperCase());
     }
 
     @Override
