@@ -5,6 +5,8 @@ import java.util.Map;
 import com.example.ml.infra.core.ModelCoordinator;
 import com.example.ml.infra.core.ModelManager;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -29,7 +31,7 @@ public class ModelResource {
      */
     @GET
     @Path("/predict")
-    public String predict(@QueryParam("input") String input) {
+    public String predict(@NotEmpty @NotNull @QueryParam("input") String input) {
         return manager.predict(input);
     }
 

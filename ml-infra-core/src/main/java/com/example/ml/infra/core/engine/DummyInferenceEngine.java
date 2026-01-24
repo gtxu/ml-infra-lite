@@ -34,7 +34,13 @@ public class DummyInferenceEngine implements InferenceEngine {
                 String.format("[Dummy] Inference failed: Model file for version %s is missing", this.version)
             );
         }
-        return String.format("[Type: DUMMY] [Source: %s] [Model v%s] Result: %s",new File(this.modelPath).getName(), this.version, input.toUpperCase());
+
+        // String type = input.contains(",") ? "CSV" : "Base64";
+
+        String preview = (input.length() > 10) ? input.substring(0, 10) + "..." : input;
+
+        return String.format("[Type: DUMMY] [Source: %s] [Model: v%s] Received input (len: %d): %s. ", 
+                         new File(this.modelPath).getName(),version, input.length(), preview);
     }
 
     @Override
