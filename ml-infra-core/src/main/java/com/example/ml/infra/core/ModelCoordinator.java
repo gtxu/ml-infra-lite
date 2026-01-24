@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.example.ml.infra.api.InferenceEngine;
 import com.example.ml.infra.core.engine.DummyInferenceEngine;
+import com.example.ml.infra.core.engine.OnnxInferenceEngine;
 import com.example.ml.infra.core.storage.S3ModelDownloader;
 
 import software.amazon.awssdk.services.s3.S3Client;
@@ -20,14 +21,17 @@ public class ModelCoordinator {
         this.downloader = new S3ModelDownloader(s3Client, bucketName);
     }
 
-    public void onModelUpdate(String version) {
+    public void onModelUpdate(String modelPath) {
         status.set("UPDATING");
         CompletableFuture.runAsync(() -> {
             try {
-                File modelFile = downloader.downloadModel(version);
-                InferenceEngine next = new DummyInferenceEngine(version, modelFile.getAbsolutePath());
+                File modelFile = downloader.downloadModel(modelPath);
+
+                InferenceEngine next = createEngine(modelPath, modelFile);
                 
                 // Warm-up the new model before swapping
+                // String warmUpInput = "0".repeat(784).replace("", ",").substring(1, 784*2);
+
                 next.predict("warmup_data");
 
                 modelManager.applyNewEngine(next);
@@ -37,6 +41,17 @@ public class ModelCoordinator {
                 status.set("FAILED: " + e.getMessage());
             }
         });
+    }
+
+    private InferenceEngine createEngine(String version, File file) throws Exception {
+        String fileName = file.getName().toLowerCase();
+        
+        if (fileName.endsWith(".onnx")) {
+            return new OnnxInferenceEngine(version, file.getAbsolutePath());
+        } else {
+            // Fallback to Dummy for .bin or unknown types
+            return new DummyInferenceEngine(version, file.getAbsolutePath());
+        }
     }
 
     public String getStatus() { return status.get(); }

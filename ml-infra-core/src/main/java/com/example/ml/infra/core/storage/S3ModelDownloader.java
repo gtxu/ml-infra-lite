@@ -1,6 +1,7 @@
 package com.example.ml.infra.core.storage;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -18,25 +19,32 @@ public class S3ModelDownloader {
         this.localBaseDir = Paths.get(System.getProperty("java.io.tmpdir"), "models");
     }
 
-    public File downloadModel(String version) {
+    /**
+     * @param modelPath example: "v1.0.0/model.onnx" or "v1.0.0/model.bin"
+     */
+    public File downloadModel(String modelPath) {
         
-        String s3Key = String.format("models/model-v%s.onnx", version);
-        Path localPath = localBaseDir.resolve(String.format("model-v%s.onnx", version));
+        String s3Key = "models/" + modelPath;
 
-        System.out.println("[S3] Starting download: s3://" + this.bucketName + "/" + s3Key);
+        Path localPath = localBaseDir.resolve(modelPath);
 
         try {
             // Synchronous fetch for the worker thread
+            Files.createDirectories(localPath.getParent());
+
+            System.out.println("[S3] Starting download: s3://" + this.bucketName + "/" + s3Key + " to " + localPath.toString());
+
             s3Client.getObject(
                 GetObjectRequest.builder()
                         .bucket(this.bucketName)
                         .key(s3Key)
                         .build(), 
                     ResponseTransformer.toFile(localPath));
+            
             return localPath.toFile();
         } catch (Exception e) {
 
-            throw new RuntimeException(String.format("[S3] Failed to download model v%s: %s", version, e.toString()), e);
+            throw new RuntimeException(String.format("[S3] Failed to download model: %s", modelPath), e);
         }
     }
 }
