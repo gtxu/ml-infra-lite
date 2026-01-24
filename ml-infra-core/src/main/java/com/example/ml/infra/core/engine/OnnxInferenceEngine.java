@@ -1,9 +1,15 @@
 package com.example.ml.infra.core.engine;
 
-import ai.onnxruntime.*;
-import com.example.ml.infra.api.InferenceEngine;
 import java.util.Collections;
 
+import com.example.ml.infra.api.InferenceEngine;
+
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
+import ai.onnxruntime.OrtSession;
+
+// ONNX Inference Engine for MNIST digit recognition
 public class OnnxInferenceEngine implements InferenceEngine {
     private final String version;
     private final OrtEnvironment env;
@@ -30,10 +36,10 @@ public class OnnxInferenceEngine implements InferenceEngine {
                 float[][] outputLabels = (float[][]) results.get(0).getValue();
                 int predictedDigit = argmax(outputLabels[0]);
                 
-                return String.format("[Model v%s] Predicted Digit: %d", version, predictedDigit);
+                return String.format("[Onnx] [Model v%s] Predicted Digit: %d", version, predictedDigit);
             }
         } catch (Exception e) {
-            return "Inference failed: " + e.getMessage();
+            return "[Onnx] Inference failed: " + e.getMessage();
         }
     }
 

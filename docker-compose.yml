@@ -47,7 +47,7 @@ services:
         echo 'Waiting for MinIO...' && sleep 1; 
       done;
       /usr/bin/mc mb myminio/models-bucket || true;
-      /usr/bin/mc cp /models/dummy/* myminio/models-bucket/models/;
+      /usr/bin/mc cp --recursive /models/* myminio/models-bucket/models/;
       /usr/bin/mc anonymous set download myminio/models-bucket;
       echo 'MinIO initialized with dummy models.';
       "

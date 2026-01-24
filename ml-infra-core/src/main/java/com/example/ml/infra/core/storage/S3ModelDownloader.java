@@ -5,13 +5,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 public class S3ModelDownloader {
     private final S3Client s3Client;
     private final String bucketName;
     private final Path localBaseDir;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public S3ModelDownloader(S3Client s3Client, String bucketName) {
         this.s3Client = s3Client;
@@ -19,9 +25,28 @@ public class S3ModelDownloader {
         this.localBaseDir = Paths.get(System.getProperty("java.io.tmpdir"), "models");
     }
 
-    /**
-     * @param modelPath example: "v1.0.0/model.onnx" or "v1.0.0/model.bin"
-     */
+    public String resolvePath(String version) {
+        try {
+            ResponseInputStream<GetObjectResponse> s3Stream = s3Client.getObject(
+                GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key("models/manifest.json")
+                        .build()
+            );
+            
+            JsonNode root = mapper.readTree(s3Stream);
+            JsonNode pathNode = root.path("mappings").path(version);
+            
+            if (pathNode.isMissingNode()) {
+                throw new IllegalArgumentException("Version not found in manifest: " + version);
+            }
+            
+            return pathNode.asText();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to resolve version through manifest.json", e);
+        }
+    }
+
     public File downloadModel(String modelPath) {
         
         String s3Key = "models/" + modelPath;
@@ -44,7 +69,7 @@ public class S3ModelDownloader {
             return localPath.toFile();
         } catch (Exception e) {
 
-            throw new RuntimeException(String.format("[S3] Failed to download model: %s", modelPath), e);
+            throw new RuntimeException(String.format("[S3] Failed to download model: %s, %s", modelPath, e.getMessage()), e);
         }
     }
 }

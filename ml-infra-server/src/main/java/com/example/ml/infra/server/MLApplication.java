@@ -58,6 +58,6 @@ public class MLApplication extends Application<MLConfiguration> {
 
         environment.healthChecks().register("model-status", new ModelHealthCheck(modelManager, coordinator));
 
-        coordinator.onModelUpdate("1.0.0");
+        coordinator.onModelUpdate("1.0.0-dummy");
     }
 }

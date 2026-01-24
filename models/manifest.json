@@ -1,0 +1,10 @@
+{
+  "mappings": {
+    "1.0.0": "v1.0.0-onnx/model.onnx",
+    "1.1.0": "v1.1.0-onnx/model.onnx",
+    "latest": "v1.1.0-onnx/model.onnx",
+    "1.0.0-dummy": "v1.0.0-dummy/model.bin",
+    "2.0.0-dummy": "v2.0.0-dummy/model.bin",
+    "latest-dummy": "v2.0.0-dummy/model.bin"
+  }
+}

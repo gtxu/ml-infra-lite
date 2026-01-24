@@ -21,18 +21,25 @@ public class ModelCoordinator {
         this.downloader = new S3ModelDownloader(s3Client, bucketName);
     }
 
-    public void onModelUpdate(String modelPath) {
+    public void onModelUpdate(String version) {
         status.set("UPDATING");
         CompletableFuture.runAsync(() -> {
             try {
+
+                String modelPath = downloader.resolvePath(version);
+
+                System.out.println("[Coordinator] Resolved " + version + " to " + modelPath);
+
                 File modelFile = downloader.downloadModel(modelPath);
 
-                InferenceEngine next = createEngine(modelPath, modelFile);
+                InferenceEngine next = createEngine(version, modelFile);
                 
                 // Warm-up the new model before swapping
-                // String warmUpInput = "0".repeat(784).replace("", ",").substring(1, 784*2);
+                String warmUpInput = java.util.stream.IntStream.range(0, 784)
+                                        .mapToObj(i -> "0")
+                                        .collect(java.util.stream.Collectors.joining(","));
 
-                next.predict("warmup_data");
+                next.predict(warmUpInput);
 
                 modelManager.applyNewEngine(next);
 
