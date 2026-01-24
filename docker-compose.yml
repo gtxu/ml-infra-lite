@@ -1,21 +1,20 @@
-version: '3.8'
-
 services:
   # ML Infrastructure Service
   ml-server:
     build: .
     container_name: ml-infra-lite-server
     ports:
-      - "8080:8080" # Application Port
-      - "8081:8081" # Admin/Health Check Port
+      - "8080:8080"
+      - "8081:8081"
     depends_on:
-      - minio
+      minio-init:
+        condition: service_completed_successfully
     environment:
-      # Injecting configuration via environment variables (12-factor app)
       - S3_ENDPOINT=http://minio:9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
-      - S3_BUCKET_NAME=models
+      - S3_BUCKET_NAME=models-bucket
+      - S3_REGION=us-east-1
     restart: unless-stopped
 
   # MinIO: Local S3-compatible Object Storage
@@ -23,8 +22,8 @@ services:
     image: minio/minio:latest
     container_name: ml-infra-minio
     ports:
-      - "9000:9000" # API Port
-      - "9001:9001" # Web Console Port
+      - "9000:9000"
+      - "9001:9001"
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
@@ -32,6 +31,23 @@ services:
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
+      interval: 20s
+      timeout: 10s
+      retries: 5
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./models:/models
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin) do 
+        echo 'Waiting for MinIO...' && sleep 1; 
+      done;
+      /usr/bin/mc mb myminio/models-bucket || true;
+      /usr/bin/mc cp /models/dummy/* myminio/models-bucket/models/;
+      /usr/bin/mc anonymous set download myminio/models-bucket;
+      echo 'MinIO initialized with dummy models.';
+      "

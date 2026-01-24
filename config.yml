@@ -4,8 +4,8 @@ swagger:
   description: "A lite infrastructure for ML model serving and hot-swapping."
 
 s3:
-  endpoint: "http://localhost:9000"
+  endpoint: "http://minio:9000"
   region: "us-east-1"
   accessKey: "minioadmin"
   secretKey: "minioadmin"
-  bucketName: "models"
+  bucketName: "models-bucket"

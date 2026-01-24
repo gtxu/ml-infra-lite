@@ -17,6 +17,16 @@ RUN mvn clean install -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
+# Install networking tools for health checks and debugging
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    netcat-openbsd \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create writable temp directory for models
+RUN mkdir -p /tmp/models && chmod 777 /tmp/models
+
 # Copy the fat jar from build stage
 COPY --from=build /app/ml-infra-server/target/ml-infra-server-1.0-SNAPSHOT.jar app.jar
 COPY config.yml config.yml
@@ -25,4 +35,4 @@ COPY config.yml config.yml
 EXPOSE 8080 8081
 
 # Startup with Dropwizard 'server' command
-ENTRYPOINT ["java", "-jar", "app.jar", "server", "config.yml"]
+ENTRYPOINT ["java", "-Djava.io.tmpdir=/tmp", "-jar", "app.jar", "server", "config.yml"]

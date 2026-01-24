@@ -34,6 +34,11 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>s3</artifactId>
+                <version>${aws.sdk.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.example.ml</groupId>
                 <artifactId>ml-infra-api</artifactId>
                 <version>${project.version}</version>

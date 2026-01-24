@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.example.ml.infra.api.InferenceEngine;
-import com.example.ml.infra.core.engine.DummyInferenceEngine;
 
 /**
  * Manages the active InferenceEngine with thread-safe hot-swapping.
@@ -15,11 +14,6 @@ public class ModelManager {
     private InferenceEngine currentEngine;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final ScheduledExecutorService cleanupExecutor = Executors.newSingleThreadScheduledExecutor();
-
-    public ModelManager() {
-        // Initial version starts with 1.0.0
-        this.currentEngine = new DummyInferenceEngine("1.0.0");
-    }
 
     public String predict(String input) {
         lock.readLock().lock();
